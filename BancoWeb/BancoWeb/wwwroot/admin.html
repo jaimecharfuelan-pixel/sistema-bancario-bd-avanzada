@@ -1,0 +1,1501 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Panel Administrativo - Tu Banco</title>
+
+    <link rel="stylesheet" href="styles/styles.css">
+
+    <style>
+                .admin-wrapper {
+                    display: flex;
+                    gap: 25px;
+                    padding: 30px;
+                }
+                .sidebar-premium {
+                    width: 260px;
+                    background: white;
+                    padding: 25px 18px;
+                    border-radius: var(--radius);
+                    box-shadow: var(--shadow);
+                    height: fit-content;
+                    position: sticky;
+                    top: 40px;
+                }
+
+                .menu-title {
+                    font-weight: bold;
+                    margin-bottom: 15px;
+                    color: var(--color-text-dark);
+                }
+
+                .side-item {
+                    padding: 12px;
+                    border-radius: 14px;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    font-size: 16px;
+                    transition: 0.25s;
+                }
+
+                    .side-item:hover {
+                        background: rgba(0, 123, 255, .10);
+                    }
+
+                    .side-item.active {
+                        background: var(--color-primary);
+                        color: white;
+                    }
+                .panel {
+                    flex: 1;
+                    padding: 35px;
+                    background: white;
+                    border-radius: var(--radius);
+                    box-shadow: var(--shadow);
+                    display: none;
+                }
+
+                    .panel.active {
+                        display: block;
+                    }
+
+                .panel-title {
+                    font-size: 24px;
+                    font-weight: bold;
+                    margin-bottom: 25px;
+                }
+                .admin-table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    background: white;
+                    border-radius: var(--radius);
+                    overflow: hidden;
+                    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+                }
+
+                    .admin-table th {
+                        background: #eef4ff;
+                        padding: 14px;
+                        font-size: 15px;
+                        font-weight: 700;
+                        text-align: center;
+                    }
+
+                    .admin-table td {
+                        text-align: center;
+                        padding: 12px 14px;
+                        border-bottom: 1px solid #eee;
+                    }
+
+                    .admin-table tr:hover td {
+                        background: #f7faff;
+                    }
+                .input-text {
+                    width: 100%;
+                    padding: 12px;
+                    border-radius: var(--radius);
+                    border: 1px solid #ccc;
+                    margin-bottom: 12px;
+                }
+                .btn-primary {
+                    background: var(--color-primary);
+                    padding: 10px 18px;
+                    color: white;
+                    border-radius: 14px;
+                    border: none;
+                    cursor: pointer;
+                    font-weight: bold;
+                    transition: .25s;
+                }
+
+                    .btn-primary:hover {
+                        background: var(--color-primary-hover);
+                    }
+
+                .btn-red {
+                    background: #d9534f;
+                    padding: 10px 18px;
+                    color: white;
+                    border-radius: 14px;
+                    border: none;
+                    cursor: pointer;
+                    font-weight: bold;
+                    transition: .25s;
+                }
+
+                    .btn-red:hover {
+                        background: #c9302c;
+                    }
+
+                .btn-small {
+                    padding: 6px 12px;
+                    font-size: 13px;
+                    border-radius: 8px;
+                    width: auto;
+                    min-width: auto;
+                    white-space: nowrap;
+                    display: inline-block;
+                }
+                .admin-table td:last-child button {
+                    margin: 0 3px;
+                    display: inline-block;
+                }
+
+                .popup {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    display: none;
+                    justify-content: center;
+                    align-items: center;
+                    background: rgba(0,0,0,0.45);
+                    backdrop-filter: blur(3px);
+                }
+
+                .popup-content {
+                    background: white;
+                    padding: 30px;
+                    border-radius: var(--radius);
+                    width: 420px;
+                    box-shadow: var(--shadow);
+                    animation: fadeIn .25s ease-out;
+                }
+
+                @keyframes fadeIn {
+                    from {
+                        opacity: 0;
+                        transform: scale(.92);
+                    }
+
+                    to {
+                        opacity: 1;
+                        transform: scale(1);
+                    }
+                }
+
+                .popup-buttons {
+                    display: flex;
+                    justify-content: flex-end;
+                    gap: 12px;
+                    margin-top: 20px;
+                }
+                #popupClienteData p,
+                #detalleSucursal p {
+                    margin: 6px 0;
+                }
+    </style>
+
+</head>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<body>
+
+    <header class="nav">
+        <div class="nav-left">
+            <img src="resources/icono.webp" class="nav-logo" />
+            <span class="nav-title">Panel Administrativo</span>
+            <span id="adminInfo" style="margin-left: 15px; font-size: 14px; color: #666;"></span>
+        </div>
+        <a href="login.html" class="nav-btn" onclick="localStorage.removeItem('usuario')">Cerrar sesión</a>
+    </header>
+
+    <div class="admin-wrapper">
+
+        <aside class="sidebar-premium">
+            <div class="menu-title">Menú</div>
+
+            <div class="side-item active" data-target="solicitudes">
+                📄 Solicitudes
+            </div>
+
+            <div class="side-item" data-target="sucursales">
+                🏢 Sucursales
+            </div>
+
+            <div class="side-item" data-target="prestamos">
+                💰 Préstamos
+            </div>
+        </aside>
+
+        <section id="solicitudes" class="panel active">
+            <h2 class="panel-title">Solicitudes de cuentas</h2>
+
+            <table class="admin-table" id="tablaSolicitudes">
+                <tr>
+                    <th>Nombre</th>
+                    <th>Cédula</th>
+                    <th>Acción</th>
+                </tr>
+            </table>
+        </section>
+
+        <section id="sucursales" class="panel">
+            <h2 class="panel-title">Sucursales</h2>
+
+            <button class="btn-primary" style="margin-bottom:20px;" onclick="abrirCrearSucursal()">➕ Crear sucursal</button>
+
+            <table class="admin-table" id="tablaSucursales">
+                <tr><th>Nombre</th><th>Estado</th></tr>
+            </table>
+        </section>
+
+        <section id="prestamos" class="panel">
+            <h2 class="panel-title">Préstamos</h2>
+
+            <div style="margin-bottom: 20px;">
+                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 15px;">
+                    <div style="display: flex; gap: 10px; align-items: center; flex: 1; min-width: 300px;">
+                        <label style="font-weight: 600; white-space: nowrap;">Buscar por ID de Sucursal:</label>
+                        <input 
+                            type="number" 
+                            id="inputIdSucursalPrestamos" 
+                            class="input-text" 
+                            placeholder="Ej: 1, 2, 3..." 
+                            style="max-width: 200px; margin-bottom: 0;"
+                            onkeypress="if(event.key === 'Enter') cargarSolicitudesPrestamos()"
+                        >
+                        <button class="btn-primary" onclick="cargarSolicitudesPrestamos()">📋 Ver Solicitudes</button>
+                    </div>
+                </div>
+                <div id="infoSucursalPrestamos" style="font-size: 14px; color: #666; font-style: italic;"></div>
+            </div>
+
+            <div id="seccionSolicitudesPrestamos">
+                <h3 style="margin-bottom: 15px;">Solicitudes de Préstamos</h3>
+                <table class="admin-table" id="tablaSolicitudesPrestamos">
+                    <tr>
+                        <th>ID Préstamo</th>
+                        <th>ID Cuenta</th>
+                        <th>Monto</th>
+                        <th>Fecha Inicio</th>
+                        <th>Fecha Vencimiento</th>
+                        <th>Acciones</th>
+                    </tr>
+                </table>
+            </div>
+
+            <div id="seccionPrestamosActivos" style="display: none; margin-top: 30px;">
+                <h3 style="margin-bottom: 15px;">Préstamos Activos</h3>
+                <table class="admin-table" id="tablaPrestamosActivos">
+                    <tr>
+                        <th>ID Préstamo</th>
+                        <th>ID Cuenta</th>
+                        <th>Monto</th>
+                        <th>Saldo</th>
+                        <th>Estado</th>
+                    </tr>
+                </table>
+            </div>
+        </section>
+
+    </div>
+
+    <div id="popupCrearSucursal" class="popup">
+        <div class="popup-content">
+
+            <h3>Crear sucursal</h3>
+
+            <input class="input-text" id="nuevaNombre" placeholder="Nombre">
+            <input class="input-text" id="nuevaDireccion" placeholder="Dirección">
+            <input class="input-text" id="nuevaTelefono" placeholder="Teléfono">
+
+            <div class="popup-buttons">
+                <button class="btn-primary" onclick="crearSucursal()">Crear</button>
+                <button class="btn-red" onclick="cerrarCrearSucursal()">Cancelar</button>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="popupDetalleSucursal" class="popup">
+        <div class="popup-content">
+
+            <h3>Detalles de sucursal</h3>
+            <div id="detalleSucursal"></div>
+
+            <div class="popup-buttons">
+                <button class="btn-primary" onclick="verCajerosSucursal()">Ver Cajeros</button>
+                <button class="btn-primary" onclick="toggleEstadoSucursal()">Cambiar estado</button>
+                <button class="btn-red" onclick="abrirEliminarSucursal()">Eliminar</button>
+            </div>
+
+            <div style="margin-top:10px; text-align:right;">
+                <button class="btn-primary" onclick="cerrarDetalleSucursal()">Cerrar</button>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="popupEliminarSucursal" class="popup">
+        <div class="popup-content">
+            <h3>¿Eliminar sucursal?</h3>
+
+            <div class="popup-buttons">
+                <button class="btn-red" onclick="confirmarEliminarSucursal()">Sí</button>
+                <button class="btn-primary" onclick="cerrarEliminarSucursal()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="popupCliente" class="popup">
+        <div class="popup-content">
+
+            <h3>Solicitud del cliente</h3>
+
+            <div id="popupClienteData" style="margin-bottom: 15px;">
+            </div>
+
+            <div class="popup-buttons">
+                <button class="btn-primary" onclick="crearCuenta()">Crear cuenta</button>
+                <button class="btn-red" onclick="cerrarPopupCliente()">Cerrar</button>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="popupCajerosSucursal" class="popup">
+        <div class="popup-content" style="width: 700px; max-height: 80vh; overflow-y: auto;">
+            <h3>Cajeros de la Sucursal</h3>
+            
+            <div style="margin-bottom: 15px;">
+                <button class="btn-primary" onclick="abrirCrearCajero()">➕ Crear Cajero</button>
+            </div>
+
+            <table class="admin-table" id="tablaCajerosSucursal">
+                <tr>
+                    <th>ID</th>
+                    <th>Estado</th>
+                    <th>Monto</th>
+                    <th>Fecha Última Recarga</th>
+                </tr>
+            </table>
+
+            <div style="margin-top: 15px; text-align: right;">
+                <button class="btn-primary" onclick="cerrarCajerosSucursal()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="popupCrearCajero" class="popup">
+        <div class="popup-content">
+            <h3>Crear Cajero</h3>
+            <input class="input-text" type="number" id="montoInicialCajero" placeholder="Monto inicial" step="0.01" min="0">
+            <div class="popup-buttons">
+                <button class="btn-primary" onclick="crearCajero()">Crear</button>
+                <button class="btn-red" onclick="cerrarCrearCajero()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="popupDetalleCajero" class="popup">
+        <div class="popup-content">
+            <h3>Acciones del Cajero</h3>
+            <div id="detalleCajeroData" style="margin-bottom: 15px;"></div>
+            <div class="popup-buttons">
+                <button class="btn-primary" onclick="abrirCambiarEstadoCajero()">Cambiar Estado</button>
+                <button class="btn-red" onclick="cerrarDetalleCajero()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="popupCambiarEstadoCajero" class="popup">
+        <div class="popup-content">
+            <h3>Cambiar Estado del Cajero</h3>
+            <p>Estado actual: <strong id="estadoActualCajero"></strong></p>
+            <div class="popup-buttons">
+                <button class="btn-primary" onclick="confirmarCambiarEstadoCajero()">Cambiar Estado</button>
+                <button class="btn-red" onclick="cerrarCambiarEstadoCajero()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="popupRecargarCajero" class="popup">
+        <div class="popup-content">
+            <h3>Recargar Cajero</h3>
+            <input class="input-text" type="number" id="montoRecarga" placeholder="Monto a recargar" step="0.01" min="0.01" required>
+            <div class="popup-buttons">
+                <button type="button" class="btn-primary" onclick="recargarCajero()">Recargar</button>
+                <button type="button" class="btn-red" onclick="cerrarRecargarCajero()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="popupCrearCuentaAdmin" class="popup">
+        <div class="popup-content">
+            <h3>Crear Cuenta</h3>
+            <select class="input-text" id="selectClienteCuenta" style="margin-bottom: 12px;">
+                <option value="">Cargando clientes...</option>
+            </select>
+            <div class="popup-buttons">
+                <button class="btn-primary" onclick="crearCuentaAdmin()">Crear</button>
+                <button class="btn-red" onclick="cerrarCrearCuentaAdmin()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="popupDetalleCuenta" class="popup">
+        <div class="popup-content">
+            <h3>Detalles de Cuenta</h3>
+            <div id="detalleCuentaData" style="margin-bottom: 15px;"></div>
+            <div class="popup-buttons">
+                <button class="btn-primary" onclick="cerrarDetalleCuenta()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="popupEditarCliente" class="popup">
+        <div class="popup-content">
+            <h3>Editar Cliente</h3>
+            <input class="input-text" id="editNombreCliente" placeholder="Nombre">
+            <input class="input-text" id="editEmailCliente" type="email" placeholder="Email">
+            <input class="input-text" id="editTelefonoCliente" placeholder="Teléfono">
+            <input class="input-text" id="editCedulaCliente" type="number" placeholder="Cédula" min="1">
+            <div class="popup-buttons">
+                <button class="btn-primary" onclick="guardarEditarCliente()">Guardar</button>
+                <button class="btn-red" onclick="cerrarEditarCliente()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <script src="js/config.js"></script>
+    <script>
+        function initTabs() {
+            const items = document.querySelectorAll('.side-item');
+
+            items.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelector('.side-item.active')?.classList.remove('active');
+                    btn.classList.add('active');
+
+                    document.querySelector('.panel.active')?.classList.remove('active');
+                    document.getElementById(btn.dataset.target).classList.add('active');
+                });
+            });
+        }
+        initTabs();
+
+        let sucursalSeleccionada = null;
+        let sucursalEliminarId = null;
+        let estadoActual = null;
+
+        async function cargarSucursales() {
+            try {
+                const data = await apiCall(API_CONFIG.SUCURSAL.LISTAR, {
+                    method: "GET"
+                });
+
+                const tabla = document.getElementById("tablaSucursales");
+                tabla.innerHTML = `
+                    <tr><th>Nombre</th><th>Estado</th></tr>
+                `;
+
+                if (data && data.length > 0) {
+                    data.forEach(s => {
+                        const estadoMostrar = s.estadoSucursal === "abierta" ? "Abierta" : 
+                                             (s.estadoSucursal === "cerrada" ? "Cerrada" : s.estadoSucursal);
+                        
+                        tabla.innerHTML += `
+                            <tr>
+                                <td onclick="verDetalleSucursal(${s.idSucursal})"
+                                    style="cursor:pointer;color:#2563eb;font-weight:600;">
+                                    ${s.nombreSucursal}
+                                </td>
+                                <td>${estadoMostrar}</td>
+                            </tr>
+                        `;
+                    });
+                } else {
+                    tabla.innerHTML += `
+                        <tr>
+                            <td colspan="2" style="text-align: center; padding: 20px; color: #999;">
+                                No hay sucursales registradas
+                            </td>
+                        </tr>
+                    `;
+                }
+            } catch (error) {
+                console.error("Error al cargar sucursales:", error);
+                alert("Error al cargar sucursales: " + (error.message || "Error desconocido"));
+            }
+        }
+
+        cargarSucursales();
+
+        async function verDetalleSucursal(id) {
+            sucursalSeleccionada = id;
+
+            try {
+                const lista = await apiCall(API_CONFIG.SUCURSAL.LISTAR, {
+                    method: "GET"
+                });
+
+                const suc = lista.find(x => x.idSucursal === id);
+
+                if (!suc) {
+                    alert("Sucursal no encontrada");
+                    return;
+                }
+
+                estadoActual = suc.estadoSucursal.toLowerCase();
+
+                const estadoMostrar = estadoActual === "abierta" ? "Abierta" : 
+                                     (estadoActual === "cerrada" ? "Cerrada" : suc.estadoSucursal);
+
+                document.getElementById("detalleSucursal").innerHTML = `
+                    <p><strong>Nombre:</strong> ${suc.nombreSucursal}</p>
+                    <p><strong>Dirección:</strong> ${suc.direccionSucursal}</p>
+                    <p><strong>Teléfono:</strong> ${suc.telefonoSucursal}</p>
+                    <p><strong>Estado:</strong> ${estadoMostrar}</p>
+                `;
+
+                document.getElementById("popupDetalleSucursal").style.display = "flex";
+            } catch (error) {
+                console.error("Error al cargar detalles de sucursal:", error);
+                alert("Error al cargar detalles: " + (error.message || "Error desconocido"));
+            }
+        }
+
+        function cerrarDetalleSucursal() {
+            document.getElementById("popupDetalleSucursal").style.display = "none";
+        }
+
+        async function toggleEstadoSucursal() {
+            try {
+                const nuevoEstado = (estadoActual === "abierta") ? "cerrada" : "abierta";
+
+                const body = {
+                    idSucursal: sucursalSeleccionada,
+                    estado: nuevoEstado
+                };
+
+                await apiCall(API_CONFIG.SUCURSAL.EDITAR_ESTADO, {
+                    method: "PUT",
+                    body: body
+                });
+
+                alert("✔ Estado actualizado");
+                cerrarDetalleSucursal();
+                cargarSucursales();
+            } catch (error) {
+                console.error("Error al cambiar estado:", error);
+                alert("Error cambiando estado: " + (error.message || "Error desconocido"));
+            }
+        }
+
+        function abrirEliminarSucursal() {
+            sucursalEliminarId = sucursalSeleccionada;
+            document.getElementById("popupEliminarSucursal").style.display = "flex";
+        }
+
+        function cerrarEliminarSucursal() {
+            document.getElementById("popupEliminarSucursal").style.display = "none";
+        }
+
+        async function confirmarEliminarSucursal() {
+            try {
+                await apiCall(`${API_CONFIG.SUCURSAL.ELIMINAR}/${sucursalEliminarId}`, {
+                    method: "DELETE"
+                });
+
+                alert("✔ Sucursal eliminada");
+                cerrarEliminarSucursal();
+                cargarSucursales();
+            } catch (error) {
+                console.error("Error al eliminar sucursal:", error);
+                alert("Error eliminando sucursal: " + (error.message || "Error desconocido"));
+            }
+        }
+
+        function abrirCrearSucursal() {
+            document.getElementById("popupCrearSucursal").style.display = "flex";
+        }
+
+        function cerrarCrearSucursal() {
+            document.getElementById("popupCrearSucursal").style.display = "none";
+        }
+
+        async function crearSucursal() {
+            try {
+                const nombre = document.getElementById("nuevaNombre").value.trim();
+                const direccion = document.getElementById("nuevaDireccion").value.trim();
+                const telefono = document.getElementById("nuevaTelefono").value.trim();
+
+                if (!nombre || !direccion || !telefono) {
+                    alert("Todos los campos son obligatorios.");
+                    return;
+                }
+
+                const admin = JSON.parse(localStorage.getItem("usuario"));
+                const idAdmin = admin?.id ?? 1;
+
+                const body = {
+                    nombreSucursal: nombre,
+                    direccionSucursal: direccion,
+                    telefonoSucursal: telefono,
+                    idAdministrador: idAdmin
+                };
+
+                await apiCall(API_CONFIG.SUCURSAL.CREAR, {
+                    method: "POST",
+                    body: body
+                });
+
+                alert("✔ Sucursal creada correctamente");
+                cerrarCrearSucursal();
+                cargarSucursales();
+            } catch (error) {
+                console.error("Error al crear sucursal:", error);
+                alert("Error creando sucursal: " + (error.message || "Error desconocido"));
+            }
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        let selectedCliente = null;
+
+        async function cargarSolicitudes() {
+            try {
+                const data = await apiCall(API_CONFIG.ADMIN.SOLICITUDES, {
+                    method: "GET"
+                });
+
+                const tabla = document.querySelector("#tablaSolicitudes");
+
+                tabla.innerHTML = `
+                <tr>
+                    <th>Nombre</th>
+                    <th>Cédula</th>
+                    <th>Acción</th>
+                </tr>
+            `;
+
+                data.forEach(c => {
+                    tabla.innerHTML += `
+                    <tr>
+                        <td>${c.nombre}</td>
+                        <td>${c.cedula}</td>
+                        <td>
+                            <button class="btn-primary btn-small"
+                                onclick="abrirPopupCliente('${c.idCliente}', '${c.nombre}', '${c.cedula}', '${c.telefono}', '${c.email}')">
+                                Ver solicitud
+                            </button>
+
+                        </td>
+                    </tr>
+                `;
+                });
+
+            } catch (e) {
+                console.error("Error cargando solicitudes:", e);
+            }
+        }
+
+        cargarSolicitudes();
+
+        function abrirPopupCliente(id, nombre, cedula, telefono, email) {
+            selectedCliente = String(id);
+
+            document.getElementById("popupCliente").style.display = "flex";
+
+            document.getElementById("popupClienteData").innerHTML = `
+        <p><strong>ID Cliente:</strong> ${id}</p>
+        <p><strong>Nombre:</strong> ${nombre}</p>
+        <p><strong>Cédula:</strong> ${cedula}</p>
+        <p><strong>Teléfono:</strong> ${telefono}</p>
+        <p><strong>Email:</strong> ${email}</p>
+        `;
+        }
+
+
+        function cerrarPopupCliente() {
+            document.getElementById("popupCliente").style.display = "none";
+        }
+
+        async function crearCuenta() {
+            try {
+                if (!selectedCliente) {
+                    alert("No hay cliente seleccionado.");
+                    return;
+                }
+
+                const admin = JSON.parse(localStorage.getItem("usuario"));
+                const idAdmin = admin?.id ?? 1;
+
+                const body = {
+                    idCliente: selectedCliente,
+                    idAdministrador: idAdmin
+                };
+
+                await apiCall(API_CONFIG.ADMIN.CREAR_CUENTA, {
+                    method: "POST",
+                    body: body
+                });
+
+                alert("✔ Cuenta creada correctamente");
+
+                cerrarPopupCliente();
+                cargarSolicitudes();
+            } catch (error) {
+                console.error("Error al crear cuenta:", error);
+                alert("Error al crear cuenta: " + (error.message || "Error desconocido"));
+            }
+        }
+
+        let cajeroSeleccionado = null;
+        let estadoActualCajero = null;
+
+        async function verCajerosSucursal() {
+            if (!sucursalSeleccionada) {
+                alert("No hay sucursal seleccionada");
+                return;
+            }
+
+            try {
+                const cajeros = await apiCall(`${API_CONFIG.CAJERO.LISTAR}/${sucursalSeleccionada}`, {
+                    method: "GET"
+                });
+
+                const tabla = document.getElementById("tablaCajerosSucursal");
+                tabla.innerHTML = `
+                    <tr>
+                        <th>ID</th>
+                        <th>Estado</th>
+                        <th>Monto</th>
+                        <th>Fecha Última Recarga</th>
+                    </tr>
+                `;
+
+                if (cajeros && cajeros.length > 0) {
+                    cajeros.forEach(c => {
+                        let fechaRecarga = 'N/A';
+                        if (c.fechaUltimaRecarga) {
+                            try {
+                                const fecha = new Date(c.fechaUltimaRecarga);
+                                fechaRecarga = fecha.toLocaleString('es-ES', {
+                                    year: 'numeric',
+                                    month: '2-digit',
+                                    day: '2-digit',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                });
+                            } catch (e) {
+                                fechaRecarga = c.fechaUltimaRecarga;
+                            }
+                        }
+                        
+                        const estadoMostrar = c.estado === "activo" ? "Activo" : 
+                                             (c.estado === "inactivo" ? "Inactivo" : c.estado);
+
+                        tabla.innerHTML += `
+                            <tr>
+                                <td onclick="verDetalleCajero(${c.idCajero}, '${c.estado}', ${c.dineroDisponible}, '${fechaRecarga.replace(/'/g, "\\'")}')"
+                                    style="cursor:pointer;color:#2563eb;font-weight:600;">
+                                    ${c.idCajero}
+                                </td>
+                                <td>${estadoMostrar}</td>
+                                <td>$${c.dineroDisponible.toFixed(2)}</td>
+                                <td>${fechaRecarga}</td>
+                            </tr>
+                        `;
+                    });
+                } else {
+                    tabla.innerHTML += `
+                        <tr>
+                            <td colspan="4" style="text-align: center; padding: 20px; color: #999;">
+                                No hay cajeros registrados en esta sucursal
+                            </td>
+                        </tr>
+                    `;
+                }
+
+                document.getElementById("popupCajerosSucursal").style.display = "flex";
+            } catch (error) {
+                console.error("Error al cargar cajeros:", error);
+                alert("Error al cargar cajeros: " + (error.message || "Error desconocido"));
+            }
+        }
+
+        function cerrarCajerosSucursal() {
+            document.getElementById("popupCajerosSucursal").style.display = "none";
+        }
+
+        function verDetalleCajero(id, estado, monto, fechaRecarga) {
+            cajeroSeleccionado = id;
+            estadoActualCajero = estado;
+
+            document.getElementById("detalleCajeroData").innerHTML = `
+                <p><strong>ID Cajero:</strong> ${id}</p>
+                <p><strong>Estado:</strong> ${estado === "activo" ? "Activo" : "Inactivo"}</p>
+                <p><strong>Monto Disponible:</strong> $${monto.toFixed(2)}</p>
+                <p><strong>Fecha Última Recarga:</strong> ${fechaRecarga}</p>
+            `;
+
+            document.getElementById("estadoActualCajero").textContent = estado === "activo" ? "Activo" : "Inactivo";
+            document.getElementById("popupDetalleCajero").style.display = "flex";
+        }
+
+        function cerrarDetalleCajero() {
+            document.getElementById("popupDetalleCajero").style.display = "none";
+        }
+
+        function abrirCrearCajero() {
+            document.getElementById("popupCrearCajero").style.display = "flex";
+        }
+
+        function cerrarCrearCajero() {
+            document.getElementById("popupCrearCajero").style.display = "none";
+            document.getElementById("montoInicialCajero").value = "";
+        }
+
+        async function crearCajero() {
+            try {
+                const montoInicial = parseFloat(document.getElementById("montoInicialCajero").value);
+
+                if (!montoInicial || montoInicial <= 0) {
+                    alert("El monto inicial debe ser mayor a cero");
+                    return;
+                }
+
+                const admin = JSON.parse(localStorage.getItem("usuario"));
+                const idAdmin = admin?.id ?? 1;
+
+                const body = {
+                    idSucursal: sucursalSeleccionada,
+                    idAdministrador: idAdmin,
+                    dineroInicial: montoInicial
+                };
+
+                await apiCall(API_CONFIG.CAJERO.CREAR, {
+                    method: "POST",
+                    body: body
+                });
+
+                alert("✔ Cajero creado correctamente");
+                cerrarCrearCajero();
+                verCajerosSucursal();
+            } catch (error) {
+                console.error("Error al crear cajero:", error);
+                alert("Error al crear cajero: " + (error.message || "Error desconocido"));
+            }
+        }
+
+        function abrirRecargarCajero() {
+            cerrarDetalleCajero();
+            document.getElementById("popupRecargarCajero").style.display = "flex";
+        }
+
+        function cerrarRecargarCajero() {
+            document.getElementById("popupRecargarCajero").style.display = "none";
+            document.getElementById("montoRecarga").value = "";
+        }
+
+        async function recargarCajero() {
+            try {
+                const monto = parseFloat(document.getElementById("montoRecarga").value);
+
+                if (!monto || monto <= 0) {
+                    alert("El monto debe ser mayor a cero");
+                    return;
+                }
+
+                const body = {
+                    idCajero: cajeroSeleccionado,
+                    monto: monto
+                };
+
+                await apiCall(API_CONFIG.CAJERO.RECARGAR, {
+                    method: "PUT",
+                    body: body
+                });
+
+                alert("✔ Cajero recargado correctamente");
+                cerrarRecargarCajero();
+                verCajerosSucursal();
+            } catch (error) {
+                console.error("Error al recargar cajero:", error);
+                alert("Error al recargar cajero: " + (error.message || "Error desconocido"));
+            }
+        }
+
+        function abrirCambiarEstadoCajero() {
+            cerrarDetalleCajero();
+            document.getElementById("popupCambiarEstadoCajero").style.display = "flex";
+        }
+
+        function cerrarCambiarEstadoCajero() {
+            document.getElementById("popupCambiarEstadoCajero").style.display = "none";
+        }
+
+        async function confirmarCambiarEstadoCajero() {
+            try {
+                const nuevoEstado = estadoActualCajero === "activo" ? "inactivo" : "activo";
+
+                const body = {
+                    idCajero: cajeroSeleccionado,
+                    estado: nuevoEstado
+                };
+
+                await apiCall(API_CONFIG.CAJERO.CAMBIAR_ESTADO, {
+                    method: "PUT",
+                    body: body
+                });
+
+                alert("✔ Estado actualizado correctamente");
+                cerrarCambiarEstadoCajero();
+                verCajerosSucursal();
+            } catch (error) {
+                console.error("Error al cambiar estado:", error);
+                alert("Error al cambiar estado: " + (error.message || "Error desconocido"));
+            }
+        }
+
+        async function cargarCuentas() {
+            try {
+                const data = await apiCall(API_CONFIG.CUENTA_ADMIN.LISTAR_ACTIVAS, {
+                    method: "GET"
+                });
+
+                const tabla = document.getElementById("tablaCuentas");
+                tabla.innerHTML = `
+                    <tr>
+                        <th>ID Cuenta</th>
+                        <th>ID Cliente</th>
+                        <th>Saldo</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                `;
+
+                if (data && data.length > 0) {
+                    data.forEach(c => {
+                        tabla.innerHTML += `
+                            <tr>
+                                <td>${c.idCuenta}</td>
+                                <td>${c.idCliente}</td>
+                                <td>$${c.saldoCuenta.toFixed(2)}</td>
+                                <td>${c.estadoCuenta}</td>
+                                <td>
+                                    <button class="btn-primary btn-small" onclick="verDetalleCuenta(${c.idCuenta})">
+                                        Ver
+                                    </button>
+                                    <button class="btn-red btn-small" onclick="eliminarCuenta(${c.idCuenta})">
+                                        Eliminar
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                } else {
+                    tabla.innerHTML += `
+                        <tr>
+                            <td colspan="5" style="text-align: center; padding: 20px; color: #999;">
+                                No hay cuentas registradas
+                            </td>
+                        </tr>
+                    `;
+                }
+            } catch (error) {
+                console.error("Error al cargar cuentas:", error);
+                alert("Error al cargar cuentas: " + (error.message || "Error desconocido"));
+            }
+        }
+
+        async function cargarClientesParaSelect() {
+            try {
+                const clientes = await apiCall(API_CONFIG.CLIENTE_ADMIN.LISTAR_ACTIVOS, { method: "GET" });
+                const select = document.getElementById("selectClienteCuenta");
+                select.innerHTML = '<option value="">Seleccione un cliente</option>';
+                if (clientes && clientes.length > 0) {
+                    clientes.forEach(c => {
+                        select.innerHTML += `<option value="${c.idCliente}">${c.idCliente} - ${c.nombreCliente}</option>`;
+                    });
+                }
+            } catch (error) {
+                console.error("Error al cargar clientes:", error);
+            }
+        }
+
+        function abrirCrearCuentaAdmin() {
+            cargarClientesParaSelect().then(() => {
+                document.getElementById("popupCrearCuentaAdmin").style.display = "flex";
+            });
+        }
+
+        function cerrarCrearCuentaAdmin() {
+            document.getElementById("popupCrearCuentaAdmin").style.display = "none";
+            document.getElementById("selectClienteCuenta").value = "";
+        }
+
+        async function crearCuentaAdmin() {
+            try {
+                const idCliente = document.getElementById("selectClienteCuenta").value;
+                if (!idCliente) {
+                    alert("Debe seleccionar un cliente");
+                    return;
+                }
+
+                const admin = JSON.parse(localStorage.getItem("usuario"));
+                const idAdmin = admin?.id ?? 1;
+
+                await apiCall(API_CONFIG.ADMIN.CREAR_CUENTA, {
+                    method: "POST",
+                    body: { idCliente: idCliente, idAdministrador: idAdmin }
+                });
+
+                alert("✔ Cuenta creada correctamente");
+                cerrarCrearCuentaAdmin();
+                cargarCuentas();
+            } catch (error) {
+                console.error("Error al crear cuenta:", error);
+                alert("Error al crear cuenta: " + (error.message || "Error desconocido"));
+            }
+        }
+
+        async function verDetalleCuenta(idCuenta) {
+            try {
+                const cuenta = await apiCall(API_CONFIG.CUENTA_ADMIN.CONSULTAR_POR_ID, {
+                    method: "POST",
+                    body: { idCuenta: idCuenta }
+                });
+
+                if (cuenta) {
+                    document.getElementById("detalleCuentaData").innerHTML = `
+                        <p><strong>ID Cuenta:</strong> ${cuenta.idCuenta}</p>
+                        <p><strong>ID Cliente:</strong> ${cuenta.idCliente}</p>
+                        <p><strong>Saldo:</strong> $${cuenta.saldo.toFixed(2)}</p>
+                        <p><strong>Estado:</strong> ${cuenta.estado}</p>
+                        <p><strong>Fecha Creación:</strong> ${cuenta.fechaCreacion || 'N/A'}</p>
+                    `;
+                    document.getElementById("popupDetalleCuenta").style.display = "flex";
+                }
+            } catch (error) {
+                console.error("Error al cargar detalle de cuenta:", error);
+                alert("Error al cargar detalle: " + (error.message || "Error desconocido"));
+            }
+        }
+
+        function cerrarDetalleCuenta() {
+            document.getElementById("popupDetalleCuenta").style.display = "none";
+        }
+
+        async function eliminarCuenta(idCuenta) {
+            if (!confirm("¿Está seguro de eliminar esta cuenta?")) return;
+
+            try {
+                await apiCall(`${API_CONFIG.CUENTA_ADMIN.ELIMINAR}/${idCuenta}`, {
+                    method: "DELETE"
+                });
+
+                alert("✔ Cuenta eliminada correctamente");
+                cargarCuentas();
+            } catch (error) {
+                console.error("Error al eliminar cuenta:", error);
+                alert("Error al eliminar cuenta: " + (error.message || "Error desconocido"));
+            }
+        }
+
+        document.querySelector('[data-target="cuentas"]')?.addEventListener('click', cargarCuentas);
+
+        async function cargarClientes() {
+            try {
+                const data = await apiCall(API_CONFIG.CLIENTE_ADMIN.LISTAR_ACTIVOS, {
+                    method: "GET"
+                });
+
+                const tabla = document.getElementById("tablaClientes");
+                tabla.innerHTML = `
+                    <tr>
+                        <th>ID Cliente</th>
+                        <th>Nombre</th>
+                        <th>Email</th>
+                        <th>Teléfono</th>
+                        <th>Acciones</th>
+                    </tr>
+                `;
+
+                if (Array.isArray(data) && data.length > 0) {
+                    data.forEach(c => {
+                        tabla.innerHTML += `
+                            <tr>
+                                <td>${c.idCliente || ''}</td>
+                                <td>${c.nombreCliente || ''}</td>
+                                <td>${c.emailCliente || ''}</td>
+                                <td>${c.telefonoCliente || 'N/A'}</td>
+                                <td>
+                                    <button class="btn-primary btn-small" onclick="editarCliente('${c.idCliente || ''}', '${(c.nombreCliente || '').replace(/'/g, "\\'")}', '${(c.emailCliente || '').replace(/'/g, "\\'")}', '${(c.telefonoCliente || '').replace(/'/g, "\\'")}', ${c.cedulaCliente || 0})">
+                                        Editar
+                                    </button>
+                                    <button class="btn-red btn-small" onclick="eliminarCliente('${c.idCliente || ''}')">
+                                        Eliminar
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                } else if (Array.isArray(data) && data.length === 0) {
+                    tabla.innerHTML += `
+                        <tr>
+                            <td colspan="5" style="text-align: center; padding: 20px; color: #999;">
+                                No hay clientes registrados
+                            </td>
+                        </tr>
+                    `;
+                } else {
+                    const errorMsg = data?.error || data?.detalle || "Error desconocido al cargar clientes";
+                    tabla.innerHTML += `
+                        <tr>
+                            <td colspan="5" style="text-align: center; padding: 20px; color: #dc3545;">
+                                Error: ${errorMsg}
+                            </td>
+                        </tr>
+                    `;
+                    console.error("Error en respuesta de API:", data);
+                }
+            } catch (error) {
+                console.error("Error al cargar clientes:", error);
+                const tabla = document.getElementById("tablaClientes");
+                if (tabla) {
+                    tabla.innerHTML = `
+                        <tr>
+                            <th>ID Cliente</th>
+                            <th>Nombre</th>
+                            <th>Email</th>
+                            <th>Teléfono</th>
+                            <th>Acciones</th>
+                        </tr>
+                        <tr>
+                            <td colspan="5" style="text-align: center; padding: 20px; color: #dc3545;">
+                                Error al cargar clientes: ${error.message || "Error desconocido"}
+                            </td>
+                        </tr>
+                    `;
+                }
+                alert("Error al cargar clientes: " + (error.message || "Error desconocido"));
+            }
+        }
+
+        let clienteEditando = null;
+        function editarCliente(idCliente, nombre, email, telefono, cedula) {
+            clienteEditando = idCliente;
+            document.getElementById("editNombreCliente").value = nombre || '';
+            document.getElementById("editEmailCliente").value = email || '';
+            document.getElementById("editTelefonoCliente").value = telefono || '';
+            document.getElementById("editCedulaCliente").value = cedula || '';
+            document.getElementById("popupEditarCliente").style.display = "flex";
+        }
+
+        function cerrarEditarCliente() {
+            document.getElementById("popupEditarCliente").style.display = "none";
+        }
+
+        async function guardarEditarCliente() {
+            try {
+                const nombre = document.getElementById("editNombreCliente").value.trim();
+                const email = document.getElementById("editEmailCliente").value.trim();
+                const telefono = document.getElementById("editTelefonoCliente").value.trim();
+                const cedula = parseInt(document.getElementById("editCedulaCliente")?.value || "0");
+
+                if (!nombre || !email) {
+                    alert("Nombre y email son requeridos");
+                    return;
+                }
+
+                if (!telefono) {
+                    alert("El teléfono es requerido");
+                    return;
+                }
+
+                if (!cedula || cedula <= 0) {
+                    alert("La cédula es requerida y debe ser un número válido");
+                    return;
+                }
+
+                await apiCall(API_CONFIG.CLIENTE_ADMIN.ACTUALIZAR_DATOS, {
+                    method: "PUT",
+                    body: {
+                        idCliente: clienteEditando,
+                        nombre: nombre,
+                        email: email,
+                        telefono: telefono,
+                        cedula: cedula
+                    }
+                });
+
+                alert("✔ Cliente actualizado correctamente");
+                cerrarEditarCliente();
+                cargarClientes();
+            } catch (error) {
+                console.error("Error al actualizar cliente:", error);
+                alert("Error al actualizar cliente: " + (error.message || "Error desconocido"));
+            }
+        }
+
+        async function eliminarCliente(idCliente) {
+            if (!confirm("¿Está seguro de eliminar este cliente?")) return;
+
+            try {
+                await apiCall(API_CONFIG.CLIENTE_ADMIN.ELIMINAR, {
+                    method: "DELETE",
+                    body: { idCliente: idCliente }
+                });
+
+                alert("✔ Cliente eliminado correctamente");
+                cargarClientes();
+            } catch (error) {
+                console.error("Error al eliminar cliente:", error);
+                alert("Error al eliminar cliente: " + (error.message || "Error desconocido"));
+            }
+        }
+
+        document.querySelector('[data-target="clientes"]')?.addEventListener('click', cargarClientes);
+
+        let sucursalSeleccionadaPrestamos = null;
+
+        async function cargarSolicitudesPrestamos() {
+            try {
+                const inputIdSucursal = document.getElementById("inputIdSucursalPrestamos");
+                const idSucursalTexto = inputIdSucursal.value.trim();
+
+                if (!idSucursalTexto) {
+                    alert("Por favor ingrese el ID de la sucursal");
+                    inputIdSucursal.focus();
+                    return;
+                }
+
+                const idSucursal = parseInt(idSucursalTexto);
+                if (isNaN(idSucursal) || idSucursal <= 0) {
+                    alert("El ID de la sucursal debe ser un número válido mayor a cero");
+                    inputIdSucursal.focus();
+                    return;
+                }
+
+                sucursalSeleccionadaPrestamos = idSucursal;
+
+                try {
+                    const sucursales = await apiCall(API_CONFIG.SUCURSAL.LISTAR, { method: "GET" });
+                    const sucursal = sucursales?.find(s => s.idSucursal === idSucursal);
+                    const infoDiv = document.getElementById("infoSucursalPrestamos");
+                    if (sucursal && infoDiv) {
+                        infoDiv.textContent = `Mostrando solicitudes de: ${sucursal.nombreSucursal} (ID: ${idSucursal})`;
+                    } else if (infoDiv) {
+                        infoDiv.textContent = `Buscando solicitudes de la sucursal ID: ${idSucursal}`;
+                    }
+                } catch (e) {
+                    console.error("Error al obtener info de sucursal:", e);
+                }
+
+                const data = await apiCall(API_CONFIG.PRESTAMO.LISTAR_SOLICITUDES, {
+                    method: "POST",
+                    body: { idSucursal: sucursalSeleccionadaPrestamos }
+                });
+
+                const tabla = document.getElementById("tablaSolicitudesPrestamos");
+                tabla.innerHTML = `
+                    <tr>
+                        <th>ID Préstamo</th>
+                        <th>ID Cuenta</th>
+                        <th>Monto</th>
+                        <th>Fecha Inicio</th>
+                        <th>Fecha Vencimiento</th>
+                        <th>Acciones</th>
+                    </tr>
+                `;
+
+                if (data && data.length > 0) {
+                    data.forEach(p => {
+                        tabla.innerHTML += `
+                            <tr>
+                                <td>${p.idPrestamo}</td>
+                                <td>${p.idCuenta}</td>
+                                <td>$${p.montoPrestamo.toFixed(2)}</td>
+                                <td>${p.fechaInicioPrestamo || 'N/A'}</td>
+                                <td>${p.fechaVencimientoPrestamo || 'N/A'}</td>
+                                <td>
+                                    <button class="btn-primary btn-small" onclick="aceptarPrestamo(${p.idPrestamo})">
+                                        Aceptar
+                                    </button>
+                                    <button class="btn-red btn-small" onclick="rechazarPrestamo(${p.idPrestamo})">
+                                        Rechazar
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                } else {
+                    tabla.innerHTML += `
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 20px; color: #999;">
+                                No hay solicitudes de préstamos
+                            </td>
+                        </tr>
+                    `;
+                }
+
+                document.getElementById("seccionSolicitudesPrestamos").style.display = "block";
+                document.getElementById("seccionPrestamosActivos").style.display = "none";
+
+                const infoDiv = document.getElementById("infoSucursalPrestamos");
+                if (infoDiv && data && data.length > 0) {
+                    infoDiv.textContent = `${infoDiv.textContent} - ${data.length} solicitud(es) encontrada(s)`;
+                } else if (infoDiv) {
+                    infoDiv.textContent = `${infoDiv.textContent} - No se encontraron solicitudes`;
+                }
+            } catch (error) {
+                console.error("Error al cargar solicitudes:", error);
+                const infoDiv = document.getElementById("infoSucursalPrestamos");
+                if (infoDiv) {
+                    infoDiv.textContent = `Error: ${error.message || "Error desconocido"}`;
+                    infoDiv.style.color = "#d9534f";
+                }
+                alert("Error al cargar solicitudes: " + (error.message || "Error desconocido"));
+            }
+        }
+
+        async function cargarPrestamosActivos() {
+            try {
+                const data = await apiCall(API_CONFIG.PRESTAMO.LISTAR_ACTIVOS, {
+                    method: "GET"
+                });
+
+                const tabla = document.getElementById("tablaPrestamosActivos");
+                tabla.innerHTML = `
+                    <tr>
+                        <th>ID Préstamo</th>
+                        <th>ID Cuenta</th>
+                        <th>Monto</th>
+                        <th>Saldo</th>
+                        <th>Estado</th>
+                    </tr>
+                `;
+
+                if (data && data.length > 0) {
+                    data.forEach(p => {
+                        tabla.innerHTML += `
+                            <tr>
+                                <td>${p.idPrestamo}</td>
+                                <td>${p.idCuenta}</td>
+                                <td>$${p.montoPrestamo.toFixed(2)}</td>
+                                <td>$${p.saldoPrestamo.toFixed(2)}</td>
+                                <td>${p.estadoPrestamo}</td>
+                            </tr>
+                        `;
+                    });
+                } else {
+                    tabla.innerHTML += `
+                        <tr>
+                            <td colspan="5" style="text-align: center; padding: 20px; color: #999;">
+                                No hay préstamos activos
+                            </td>
+                        </tr>
+                    `;
+                }
+
+                document.getElementById("seccionSolicitudesPrestamos").style.display = "none";
+                document.getElementById("seccionPrestamosActivos").style.display = "block";
+            } catch (error) {
+                console.error("Error al cargar préstamos activos:", error);
+                alert("Error al cargar préstamos activos: " + (error.message || "Error desconocido"));
+            }
+        }
+
+        async function aceptarPrestamo(idPrestamo) {
+            if (!confirm("¿Está seguro de aceptar este préstamo?")) return;
+
+            try {
+                await apiCall(API_CONFIG.PRESTAMO.ACEPTAR, {
+                    method: "POST",
+                    body: { idPrestamo: idPrestamo }
+                });
+
+                alert("✔ Préstamo aceptado correctamente");
+                cargarSolicitudesPrestamos();
+            } catch (error) {
+                console.error("Error al aceptar préstamo:", error);
+                alert("Error al aceptar préstamo: " + (error.message || "Error desconocido"));
+            }
+        }
+
+        async function rechazarPrestamo(idPrestamo) {
+            if (!confirm("¿Está seguro de rechazar este préstamo?")) return;
+
+            try {
+                await apiCall(API_CONFIG.PRESTAMO.RECHAZAR, {
+                    method: "POST",
+                    body: { idPrestamo: parseInt(idPrestamo) }
+                });
+
+                alert("✔ Préstamo rechazado correctamente");
+                cargarSolicitudesPrestamos();
+            } catch (error) {
+                console.error("Error al rechazar préstamo:", error);
+                alert("Error al rechazar préstamo: " + (error.message || "Error desconocido"));
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const usuario = JSON.parse(localStorage.getItem("usuario"));
+            if (!usuario || usuario.tipoUsuario !== "ADMIN") {
+                alert("Acceso denegado. Debe iniciar sesión como administrador.");
+                window.location.href = "login.html";
+                return;
+            }
+
+            const adminInfo = document.getElementById("adminInfo");
+            if (adminInfo && usuario) {
+                adminInfo.textContent = `👤 Admin ID: ${usuario.id || 'N/A'}`;
+            }
+
+            console.log("Admin logueado:", usuario);
+        });
+
+    </script>
+
+</body>
+</html>

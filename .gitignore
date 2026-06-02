@@ -1,0 +1,48 @@
+# Docker
+.dockerignore
+
+# Visual Studio
+.vs/
+bin/
+obj/
+*.csproj.user
+*.sln.user
+.vscode/
+
+# Dependencies
+node_modules/
+package-lock.json
+
+# Environment
+.env
+.env.local
+
+# Runtime
+*.dll
+*.exe
+*.pdb
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+*.swp
+*.swo
+
+# Logs
+logs/
+*.log
+
+# Database
+*.db
+*.sqlite
+
+# Temporary
+tmp/
+temp/
+
+# Build outputs
+dist/
+release/

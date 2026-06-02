@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  # Base de Datos Oracle XE (Express Edition)
+  oracle-db:
+    image: gvenzl/oracle-xe:latest
+    container_name: banco_oracle_db
+    ports:
+      - "1521:1521"
+    environment:
+      ORACLE_PASSWORD: oracle123
+      ORACLE_ALLOW_REMOTE: "true"
+    volumes:
+      # Volumen persistente para datos
+      - oracle_data:/opt/oracle/oradata
+      # Script maestro de inicialización
+      - ./ScriptBaseDatos/SCRIPT_MAESTRO_COMPLETO.sql:/docker-entrypoint-initdb.d/01_banco_maestro.sql
+    networks:
+      - banco-network
+    # Health check simplificado que solo verifica si Oracle está escuchando
+    healthcheck:
+      test: ["CMD", "bash", "-c", "echo 'SELECT 1 FROM DUAL;' | sqlplus -s system/oracle123@localhost:1521/XEPDB1 as sysdba"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
+    restart: unless-stopped
+
+  # API REST (.NET 8.0)
+  banco-api:
+    build:
+      context: ./BancoApi
+      dockerfile: Dockerfile
+    container_name: banco_api_container
+    ports:
+      - "8085:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Data Source=oracle-db:1521/XEPDB1;User Id=system;Password=oracle123;
+    depends_on:
+      oracle-db:
+        condition: service_healthy
+    networks:
+      - banco-network
+    restart: unless-stopped
+
+networks:
+  banco-network:
+    driver: bridge
+
+volumes:
+  oracle_data:
+    driver: local
