@@ -1,5 +1,5 @@
 const API_CONFIG = {
-    BASE_URL: "https://localhost:7251/api",
+    BASE_URL: "http://localhost:8102/api",
     
     AUTH: {
         LOGIN: "/auth/login"

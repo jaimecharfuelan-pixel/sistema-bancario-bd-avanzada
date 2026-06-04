@@ -6,7 +6,7 @@ services:
     image: gvenzl/oracle-xe:latest
     container_name: banco_oracle_db
     ports:
-      - "1521:1521"
+      - "8101:1521"
     environment:
       ORACLE_PASSWORD: oracle123
       ORACLE_ALLOW_REMOTE: "true"
@@ -33,7 +33,7 @@ services:
       dockerfile: Dockerfile
     container_name: banco_api_container
     ports:
-      - "8085:8080"
+      - "8102:8080"
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:8080

@@ -18,14 +18,18 @@ RUN dotnet publish "BancoApi.csproj" -c Release -o /app/publish /p:UseAppHost=fa
 # Stage 3: Runtime
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
+
+# Instalar curl para healthcheck
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+
 COPY --from=publish /app/publish .
 
 # Exponer puerto (el que uses en docker-compose)
 EXPOSE 8080
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD dotnet /app/healthcheck.dll || exit 1
+# Health check (verificar que la API responda)
+HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
+    CMD curl --fail http://localhost:8080/swagger/v1/swagger.json || exit 1
 
 # Entrypoint
 ENTRYPOINT ["dotnet", "BancoApi.dll"]

@@ -96,8 +96,9 @@ dotnet watch
 
 #### 4️⃣ **Verificar que Está Funcionando**
 - 🌐 **Frontend**: http://localhost:5000
-- 📚 **API Swagger**: http://localhost:8085/swagger
-- 💾 **Base de Datos**: localhost:1521 (system/oracle123)
+- 📚 **API Swagger**: http://localhost:8085/swagger (⚠️ Ahora funciona en todos los ambientes)
+- � **API JSON Schema**: http://localhost:8085/swagger/v1/swagger.json
+- �💾 **Base de Datos**: localhost:1521/XEPDB1 (system/oracle123)
 
 ---
 
@@ -530,14 +531,31 @@ curl -X GET http://localhost:8085/api/cliente \
 }
 ```
 
-### Credenciales de Base de Datos (Desarrollo)
+### Credenciales de Base de Datos
 
+#### Desde Contenedores (API Docker)
 ```
-Usuario:     system
-Contraseña:  oracle123
-Host:        oracle-db:1521 (Docker)
-             localhost:1521 (Local)
+Usuario:       system
+Contraseña:    oracle123
+Host:          oracle-db:1521
 Base de Datos: XEPDB1
+Connection String: User Id=system;Password=oracle123;Data Source=oracle-db:1521/XEPDB1;
+```
+
+#### Desde tu PC (Local)
+```
+Usuario:       system
+Contraseña:    oracle123
+Host:          localhost:1521
+Base de Datos: XEPDB1
+Connection String: User Id=system;Password=oracle123;Data Source=localhost:1521/XEPDB1;
+```
+
+#### Credenciales de Prueba (Datos precargados)
+```
+Admin: admin1@banco.com / admin123
+Cliente 1: juan.perez@email.com (Cuenta: 1, Contraseña: 1234567890)
+Cliente 2: maria.lopez@email.com (Cuenta: 2, Contraseña: 2345678901)
 ```
 
 ---
